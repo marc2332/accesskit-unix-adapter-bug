@@ -11,7 +11,11 @@ use glutin::{
 };
 use glutin_winit::DisplayBuilder;
 use raw_window_handle::HasRawWindowHandle;
-use winit::{event_loop::EventLoopBuilder, event::{KeyboardInput, ElementState, VirtualKeyCode}};
+use tokio::runtime::Builder;
+use winit::{
+    event::{ElementState, KeyboardInput, VirtualKeyCode},
+    event_loop::EventLoopBuilder,
+};
 
 use std::{ffi::CString, num::NonZeroU32};
 
@@ -23,12 +27,16 @@ use winit::{
 
 use skia_safe::{
     gpu::{gl::FramebufferInfo, BackendRenderTarget, SurfaceOrigin},
-    ColorType, Surface, Color,
+    Color, ColorType, Surface,
 };
 
 fn main() {
+    let rt = Builder::new_multi_thread().enable_all().build().unwrap();
+    let _guard = rt.enter();
     let el = EventLoopBuilder::<ActionRequestEvent>::with_user_event().build();
-    let winit_window_builder = WindowBuilder::new().with_title("rust-skia-gl-window").with_visible(false);
+    let winit_window_builder = WindowBuilder::new()
+        .with_title("rust-skia-gl-window")
+        .with_visible(false);
 
     let template = ConfigTemplateBuilder::new()
         .with_alpha_size(8)
@@ -170,8 +178,6 @@ fn main() {
         window: Window,
     }
 
-    
-
     let mut env = Env {
         surface,
         gl_surface,
@@ -266,15 +272,15 @@ fn main() {
     });
 }
 
-use std::{
-    num::NonZeroU128,
-    sync::{Arc, Mutex},
-};
 use accesskit::{
     Action, ActionRequest, DefaultActionVerb, Live, Node, NodeBuilder, NodeClassSet, NodeId, Rect,
     Role, Tree, TreeUpdate,
 };
 use accesskit_winit::{ActionRequestEvent, Adapter};
+use std::{
+    num::NonZeroU128,
+    sync::{Arc, Mutex},
+};
 
 const WINDOW_TITLE: &str = "Hello world";
 
